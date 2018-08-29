@@ -87,6 +87,7 @@ public class AddressBook {
     // These are the prefix strings to define the data type of a command parameter
     private static final String PERSON_DATA_PREFIX_PHONE = "p/";
     private static final String PERSON_DATA_PREFIX_EMAIL = "e/";
+    private static final String SORT_KEY_PREFIX = "s/";
 
     private static final String PERSON_STRING_REPRESENTATION = "%1$s " // name
             + PERSON_DATA_PREFIX_PHONE + "%2$s " // phone
@@ -105,8 +106,11 @@ public class AddressBook {
     private static final String COMMAND_FIND_EXAMPLE = COMMAND_FIND_WORD + " alice bob charlie";
 
     private static final String COMMAND_LIST_WORD = "list";
-    private static final String COMMAND_LIST_DESC = "Displays all persons as a list with index numbers.";
-    private static final String COMMAND_LIST_EXAMPLE = COMMAND_LIST_WORD;
+    private static final String COMMAND_LIST_DESC = "Displays all persons as a list with index numbers."
+            + "List can sorted by any valid person field if specified.";
+    private static final String COMMAND_LIST_EXAMPLE = COMMAND_LIST_WORD + " s/name";
+    private static final String COMMAND_LIST_PARAMETERS = "NAME "
+            + SORT_KEY_PREFIX + "SORT_KEY(optional)";
 
     private static final String COMMAND_DELETE_WORD = "delete";
     private static final String COMMAND_DELETE_DESC = "Deletes a person identified by the index number used in "
@@ -128,16 +132,6 @@ public class AddressBook {
 
     private static final String DIVIDER = "===================================================";
 
-
-    /* We use a String array to store details of a single person.
-     * The constants given below are the indexes for the different data elements of a person
-     * used by the internal String[] storage format.
-     * For example, a person's name is stored as the 0th element in the array.
-     */
-    private static final int PERSON_DATA_INDEX_NAME = 0;
-    private static final int PERSON_DATA_INDEX_PHONE = 1;
-    private static final int PERSON_DATA_INDEX_EMAIL = 2;
-
     /*
      * We use HashMap to store details of a single person.
      * The constants given below are the keys of the Hashmap which are the different
@@ -146,6 +140,13 @@ public class AddressBook {
     private static final String PERSON_PROPERTY_NAME = "name";
     private static final String PERSON_PROPERTY_EMAIL = "email";
     private static final String PERSON_PROPERTY_PHONE = "phone";
+
+    /* An array to store all person properties */
+    private static final String[] personProperties = {
+            PERSON_PROPERTY_NAME,
+            PERSON_DATA_PREFIX_PHONE,
+            PERSON_PROPERTY_EMAIL
+    };
 
     /**
      * The number of data elements for a single person.
@@ -376,7 +377,7 @@ public class AddressBook {
             case COMMAND_FIND_WORD:
                 return executeFindPersons(commandArgs);
             case COMMAND_LIST_WORD:
-                return executeListAllPersonsInAddressBook();
+                return executeListAllPersonsInAddressBook(commandArgs);
             case COMMAND_DELETE_WORD:
                 return executeDeletePerson(commandArgs);
             case COMMAND_CLEAR_WORD:
@@ -572,15 +573,94 @@ public class AddressBook {
 
     /**
      * Displays all persons in the address book to the user; in added order.
-     *
+     * @param commandArgs full command args string from user
      * @return feedback display message for the operation result
      */
-    private static String executeListAllPersonsInAddressBook() {
-        ArrayList<HashMap<String,String>> toBeDisplayed = getAllPersonsInAddressBook();
+    private static String executeListAllPersonsInAddressBook(String commandArgs) {
+        ArrayList<HashMap<String,String>> toBeDisplayed;
+        // if list command is called without arguments
+        if(commandArgs.trim().length() > 0) {
+            // try decoding the the sort key from the raw args
+            final Optional<String> sortKey = decodeSortKeyFrom(commandArgs);
+
+            // checks if args are valid(sort key will not be present if args are invalid)
+            if(sortKey.isPresent()) {
+                ArrayList<HashMap<String,String>> allPersons = getAllPersonsInAddressBook();
+                toBeDisplayed = sortPersons(allPersons, sortKey.get());
+            } else {
+                return getMessageForInvalidCommandInput(COMMAND_LIST_WORD, getUsageInfoForListCommand());
+            }
+
+        } else {
+            toBeDisplayed = getAllPersonsInAddressBook();
+        }
+
         showToUser(toBeDisplayed);
         return getMessageForPersonsDisplayedSummary(toBeDisplayed);
     }
 
+    /**
+     * Decodes a sort key passed in as command argument.
+     *
+     * @param commandArgs argument to be decoded
+     * @return if cannot decode: empty Optional
+     *         else: Optional containing decoded sort key
+     */
+    private static Optional<String> decodeSortKeyFrom(String commandArgs) {
+        if(!isSortKeyExtractableFrom(commandArgs)){
+            return Optional.empty();
+        }
+        final String extractedSortKey = extractSortKeyFrom(commandArgs);
+
+        return isSortKeyValid(extractedSortKey) ? Optional.of(extractedSortKey) : Optional.empty();
+    }
+
+    /**
+     * Returns true if a sort key can be extracted from argument string.
+     *
+     * @param commandArgs command argument which may contain sort key.
+=     */
+    private static boolean isSortKeyExtractableFrom(String commandArgs) {
+        boolean isValidPrefix = commandArgs.trim().substring(0,2).equals(SORT_KEY_PREFIX);
+        return isValidPrefix;
+    }
+
+    /**
+     * Extracts sort key from command argument
+     *
+     * @param encoded string containing the sort key
+     * @return sort key
+     */
+    private static String extractSortKeyFrom(String encoded) {
+        return encoded.substring(2);
+    }
+
+    /**
+     * Returns true if sort key is a valid field in address book.
+     *
+     * @param sortKey sort key
+     */
+    private static boolean isSortKeyValid(String sortKey) {
+        return Arrays.stream(personProperties).anyMatch((property) -> property.equals(sortKey));
+    }
+
+    /**
+     * Sorts the persons by sortKey
+     *
+     * @param persons list of persons to be sorted
+     * @param sortKey sort key
+     * @return list of sorted persons
+     */
+    private static ArrayList<HashMap<String,String>> sortPersons(ArrayList<HashMap<String,String>>persons,
+                                                                 String sortKey) {
+        persons.sort(new Comparator<HashMap<String, String>>() {
+            @Override
+            public int compare(HashMap<String, String> person1, HashMap<String, String> person2) {
+                return person1.get(sortKey).compareTo(person2.get(sortKey));
+            }
+        });
+        return persons;
+    }
     /**
      * Requests to terminate the program.
      */
@@ -1098,6 +1178,7 @@ public class AddressBook {
     private static String getUsageInfoForAllCommands() {
         return getUsageInfoForAddCommand() + LS
                 + getUsageInfoForFindCommand() + LS
+                + getUsageInfoForListCommand() + LS
                 + getUsageInfoForViewCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
                 + getUsageInfoForClearCommand() + LS
@@ -1117,6 +1198,13 @@ public class AddressBook {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_FIND_WORD, COMMAND_FIND_DESC) + LS
                 + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_FIND_PARAMETERS) + LS
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_FIND_EXAMPLE) + LS;
+    }
+
+    /** Returns the string for showing 'list' command usage instruction */
+    private static String getUsageInfoForListCommand() {
+        return String.format(MESSAGE_COMMAND_HELP,COMMAND_LIST_WORD,COMMAND_LIST_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_LIST_PARAMETERS) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_LIST_EXAMPLE) + LS;
     }
 
     /** Returns the string for showing 'delete' command usage instruction */
