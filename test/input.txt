@@ -100,6 +100,23 @@
   list
 
 ##########################################################
+# test list persons command
+##########################################################
+
+  # should add correctly
+  add Ananda p/91274960 e/h0910139@gmail.com
+  add Aaron p/99127788 e/zimbabwe@nus.edu.sg
+  add Clara p/87603456 e/clara@nus.edu.sg
+  # should catch invalid argument
+  list sdfasd
+  # should catch invalid argument
+  list s/fake
+  # should sort by the key provided
+  list s/name
+  list s/phone
+  list s/email
+
+##########################################################
 # test exit command
 ##########################################################
 

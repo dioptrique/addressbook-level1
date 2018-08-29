@@ -144,7 +144,7 @@ public class AddressBook {
     /* An array to store all person properties */
     private static final String[] personProperties = {
             PERSON_PROPERTY_NAME,
-            PERSON_DATA_PREFIX_PHONE,
+            PERSON_PROPERTY_PHONE,
             PERSON_PROPERTY_EMAIL
     };
 
@@ -1179,7 +1179,6 @@ public class AddressBook {
         return getUsageInfoForAddCommand() + LS
                 + getUsageInfoForFindCommand() + LS
                 + getUsageInfoForListCommand() + LS
-                + getUsageInfoForViewCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
                 + getUsageInfoForClearCommand() + LS
                 + getUsageInfoForExitCommand() + LS

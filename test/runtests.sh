@@ -32,7 +32,7 @@ java -classpath ../bin seedu.addressbook.AddressBook 'data/valid.filename' < exi
 java -classpath ../bin seedu.addressbook.AddressBook < input.txt >> actual.txt
 
 # compare the output to the expected output
-diff actual.txt expected.txt
+diff actual.txt expected.txt -Z
 if [ $? -eq 0 ]
 then
     echo "Test result: PASSED"

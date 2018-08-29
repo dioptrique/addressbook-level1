@@ -59,8 +59,9 @@
 || 	Parameters: KEYWORD [MORE_KEYWORDS]
 || 	Example: find alice bob charlie
 || 
-|| list: Displays all persons as a list with index numbers.
-|| 	Example: list
+|| list: Displays all persons as a list with index numbers.List can sorted by any valid person field if specified.
+|| 	Parameters: NAME s/SORT_KEY(optional)
+|| 	Example: list s/name
 || 
 || delete: Deletes a person identified by the index number used in the last find/list call.
 || 	Parameters: INDEX
@@ -274,6 +275,50 @@
 || Enter command: || [Command entered:  list]
 || 
 || 0 persons found!
+|| ===================================================
+|| Enter command: || [Command entered:  add Ananda p/91274960 e/h0910139@gmail.com]
+|| New person added: Ananda, Phone: 91274960, Email: h0910139@gmail.com
+|| ===================================================
+|| Enter command: || [Command entered:  add Aaron p/99127788 e/zimbabwe@nus.edu.sg]
+|| New person added: Aaron, Phone: 99127788, Email: zimbabwe@nus.edu.sg
+|| ===================================================
+|| Enter command: || [Command entered:  add Clara p/87603456 e/clara@nus.edu.sg]
+|| New person added: Clara, Phone: 87603456, Email: clara@nus.edu.sg
+|| ===================================================
+|| Enter command: || [Command entered:  list sdfasd]
+|| Invalid command format: list  
+|| list: Displays all persons as a list with index numbers.List can sorted by any valid person field if specified.
+|| 	Parameters: NAME s/SORT_KEY(optional)
+|| 	Example: list s/name
+||  
+|| ===================================================
+|| Enter command: || [Command entered:  list s/fake]
+|| Invalid command format: list  
+|| list: Displays all persons as a list with index numbers.List can sorted by any valid person field if specified.
+|| 	Parameters: NAME s/SORT_KEY(optional)
+|| 	Example: list s/name
+||  
+|| ===================================================
+|| Enter command: || [Command entered:  list s/name]
+|| 	1. Aaron  Phone Number: 99127788  Email: zimbabwe@nus.edu.sg
+|| 	2. Ananda  Phone Number: 91274960  Email: h0910139@gmail.com
+|| 	3. Clara  Phone Number: 87603456  Email: clara@nus.edu.sg
+||  
+|| 3 persons found!
+|| ===================================================
+|| Enter command: || [Command entered:  list s/phone]
+|| 	1. Clara  Phone Number: 87603456  Email: clara@nus.edu.sg
+|| 	2. Ananda  Phone Number: 91274960  Email: h0910139@gmail.com
+|| 	3. Aaron  Phone Number: 99127788  Email: zimbabwe@nus.edu.sg
+||  
+|| 3 persons found!
+|| ===================================================
+|| Enter command: || [Command entered:  list s/email]
+|| 	1. Clara  Phone Number: 87603456  Email: clara@nus.edu.sg
+|| 	2. Ananda  Phone Number: 91274960  Email: h0910139@gmail.com
+|| 	3. Aaron  Phone Number: 99127788  Email: zimbabwe@nus.edu.sg
+||  
+|| 3 persons found!
 || ===================================================
 || Enter command: || [Command entered:  exit]
 || Exiting Address Book... Good bye!
